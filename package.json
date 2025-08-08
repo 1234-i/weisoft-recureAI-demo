@@ -11,8 +11,8 @@
     "type-check": "vue-tsc --build"
   },
   "dependencies": {
-    "pcm-agents": "^0.6.22",
-    "pcm-agents-vue": "^0.3.19",
+    "pcm-agents": "^0.6.24",
+    "pcm-agents-vue": "^0.3.21",
     "vue": "^3.2.37"
   },
   "devDependencies": {

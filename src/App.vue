@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { PcmZyghModal } from "pcm-agents-vue";
+import { PcmZyghModal, PcmJlzzModal } from "pcm-agents-vue";
 
 // Token 相关状态
 const token = ref("");
@@ -108,8 +108,12 @@ const handleTokenInvalid = async () => {
 // 普通聊天模态框
 const isModalOpen = ref(false);
 
+// 简历制作模态框
+const isJlzzModalOpen = ref(false);
+
 // 模态框元素引用
 const modalRef = ref(null);
+const jlzzModalRef = ref(null);
 
 const openChatModal = () => {
   // 检查是否有有效的 token
@@ -122,11 +126,27 @@ const openChatModal = () => {
   isModalOpen.value = true;
 };
 
+const openJlzzModal = () => {
+  // 检查是否有有效的 token
+  if (!token.value) {
+    console.error("没有有效的 token，无法打开简历制作窗口");
+    return;
+  }
+
+  // 直接打开模态框
+  isJlzzModalOpen.value = true;
+};
+
 const conversationId = ref("");
 
 const handleModalClosed = () => {
   console.log("聊天窗口已关闭");
   isModalOpen.value = false;
+};
+
+const handleJlzzModalClosed = () => {
+  console.log("简历制作窗口已关闭");
+  isJlzzModalOpen.value = false;
 };
 
 const handleStreamComplete = (event: CustomEvent) => {
@@ -141,6 +161,11 @@ const handleConversationStart = (event: CustomEvent) => {
 const handleInterviewComplete = (event: CustomEvent) => {
   console.log("面试完成:", event.detail);
   isModalOpen.value = false;
+};
+
+
+const handleJlzzConversationStart = (event: CustomEvent) => {
+  console.log("简历制作会话开始:", event.detail);
 };
 
 // 组件挂载时获取 token
@@ -174,6 +199,13 @@ onMounted(() => {
       >
         打开职业规划助手
       </button>
+      <button
+        @click="openJlzzModal"
+        :disabled="!token || isTokenLoading"
+        :class="{ disabled: !token || isTokenLoading }"
+      >
+        打开简历制作
+      </button>
       <button @click="initToken" :disabled="isTokenLoading">
         {{ isTokenLoading ? "获取中..." : "重新获取Token" }}
       </button>
@@ -194,6 +226,21 @@ onMounted(() => {
       @interview-complete="handleInterviewComplete"
       @token-invalid="handleTokenInvalid"
     ></PcmZyghModal>
+
+    <!-- 简历制作模态框 -->
+    <PcmJlzzModal
+      v-if="token"
+      ref="jlzzModalRef"
+      id="pcm-jlzz-modal"
+      modal-title="简历制作"
+      icon="https://pub.pincaimao.com/static/common/i_pcm_logo.png"
+      :fullscreen="false"
+      :is-open="isJlzzModalOpen"
+      :token="token"
+      @modal-closed="handleJlzzModalClosed"
+      @conversation-start="handleJlzzConversationStart"
+      @token-invalid="handleTokenInvalid"
+    ></PcmJlzzModal>
   </main>
 </template>
 
