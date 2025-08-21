@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { PcmZyghModal, PcmJlzzModal } from "pcm-agents-vue";
+import { PcmZyghModal, PcmJlzzModal, PcmZskChatModal } from "pcm-agents-vue";
+// 导入 naive-ui 组件
+import {
+  NModal,
+  NButton,
+  NSpace,
+  NMessageProvider,
+  NConfigProvider,
+} from "naive-ui";
 
 // Token 相关状态
 const token = ref("");
@@ -10,6 +18,10 @@ const customInputs = ref({
   file_url: "/resources/file/20250418/590671879d5bf4b6ffe045664ff59ec7.pdf",
   file_name: "陈静- JAVA.pdf",
 });
+
+// 智能员工模态框状态
+const isZskModalOpen = ref(false);
+const isNaiveModalOpen = ref(false);
 
 interface TokenData {
   token: string;
@@ -137,6 +149,26 @@ const openJlzzModal = () => {
   isJlzzModalOpen.value = true;
 };
 
+// 打开智能员工模态框（使用 naive-ui modal）
+const openZskModal = () => {
+  if (!token.value) {
+    console.error("没有有效的 token，无法打开智能员工窗口");
+    return;
+  }
+
+  isNaiveModalOpen.value = true;
+  // 延迟一点打开内部的 PcmZskChatModal
+  setTimeout(() => {
+    isZskModalOpen.value = true;
+  }, 100);
+};
+
+// 关闭智能员工模态框
+const closeZskModal = () => {
+  isZskModalOpen.value = false;
+  isNaiveModalOpen.value = false;
+};
+
 const conversationId = ref("");
 
 const handleModalClosed = () => {
@@ -147,6 +179,12 @@ const handleModalClosed = () => {
 const handleJlzzModalClosed = () => {
   console.log("简历制作窗口已关闭");
   isJlzzModalOpen.value = false;
+};
+
+// 智能员工模态框关闭处理
+const handleZskModalClosed = () => {
+  console.log("智能员工窗口已关闭");
+  closeZskModal();
 };
 
 const handleStreamComplete = (event: CustomEvent) => {
@@ -163,10 +201,15 @@ const handleInterviewComplete = (event: CustomEvent) => {
   isModalOpen.value = false;
 };
 
+// 智能员工会话开始处理
+const handleZskConversationStart = (event: CustomEvent) => {
+  console.log("智能员工会话开始:", event.detail);
+};
 
 const handleJlzzConversationStart = (event: CustomEvent) => {
   console.log("简历制作会话开始:", event.detail);
 };
+
 
 // 组件挂载时获取 token
 onMounted(() => {
@@ -175,73 +218,123 @@ onMounted(() => {
 </script>
 
 <template>
-  <main>
-    <img
-      alt="Vue logo"
-      class="logo"
-      src="./assets/logo.svg"
-      width="125"
-      height="125"
-    />
+  <NConfigProvider>
+    <NMessageProvider>
+      <main>
+        <img
+          alt="Vue logo"
+          class="logo"
+          src="./assets/logo.svg"
+          width="125"
+          height="125"
+        />
 
-    <!-- Token 状态显示 -->
-    <div class="token-status">
-      <p v-if="isTokenLoading">正在获取 Token...</p>
-      <p v-else-if="token" class="token-success">✅ Token 获取成功</p>
-      <p v-else class="token-error">❌ Token 获取失败</p>
-    </div>
+        <!-- Token 状态显示 -->
+        <div class="token-status">
+          <p v-if="isTokenLoading">正在获取 Token...</p>
+          <p v-else-if="token" class="token-success">✅ Token 获取成功</p>
+          <p v-else class="token-error">❌ Token 获取失败</p>
+        </div>
 
-    <div class="button-group">
-      <button
-        @click="openChatModal"
-        :disabled="!token || isTokenLoading"
-        :class="{ disabled: !token || isTokenLoading }"
-      >
-        打开职业规划助手
-      </button>
-      <button
-        @click="openJlzzModal"
-        :disabled="!token || isTokenLoading"
-        :class="{ disabled: !token || isTokenLoading }"
-      >
-        打开简历制作
-      </button>
-      <button @click="initToken" :disabled="isTokenLoading">
-        {{ isTokenLoading ? "获取中..." : "重新获取Token" }}
-      </button>
-    </div>
+        <NSpace vertical size="large">
+          <NSpace justify="center">
+            <NButton
+              type="primary"
+              size="large"
+              @click="openChatModal"
+              :disabled="!token || isTokenLoading"
+            >
+              打开职业规划助手
+            </NButton>
+            <NButton
+              type="info"
+              size="large"
+              @click="openJlzzModal"
+              :disabled="!token || isTokenLoading"
+            >
+              打开简历制作
+            </NButton>
+            <NButton
+              type="success"
+              size="large"
+              @click="openZskModal"
+              :disabled="!token || isTokenLoading"
+            >
+              🤖 打开智能员工助手
+            </NButton>
+            <NButton
+              type="warning"
+              size="large"
+              @click="initToken"
+              :loading="isTokenLoading"
+            >
+              重新获取Token
+            </NButton>
+          </NSpace>
+        </NSpace>
 
-    <!-- 聊天模态框 - 使用动态获取的token -->
-    <PcmZyghModal
-      v-if="token"
-      ref="modalRef"
-      id="pcm-chat-modal"
-      modal-title="职业规划助手"
-      :is-open="isModalOpen"
-      :token="token"
-      :custom-inputs="customInputs"
-      @modal-closed="handleModalClosed"
-      @stream-complete="handleStreamComplete"
-      @conversation-start="handleConversationStart"
-      @interview-complete="handleInterviewComplete"
-      @token-invalid="handleTokenInvalid"
-    ></PcmZyghModal>
+        <!-- 聊天模态框 - 使用动态获取的token -->
+        <PcmZyghModal
+          v-if="token"
+          ref="modalRef"
+          id="pcm-chat-modal"
+          modal-title="职业规划助手"
+          :is-open="isModalOpen"
+          :token="token"
+          :custom-inputs="customInputs"
+          @modal-closed="handleModalClosed"
+          @stream-complete="handleStreamComplete"
+          @conversation-start="handleConversationStart"
+          @interview-complete="handleInterviewComplete"
+          @token-invalid="handleTokenInvalid"
+        ></PcmZyghModal>
 
-    <!-- 简历制作模态框 -->
-    <PcmJlzzModal
-      v-if="token"
-      ref="jlzzModalRef"
-      id="pcm-jlzz-modal"
-      modal-title="简历制作"
-      icon="https://pub.pincaimao.com/static/common/i_pcm_logo.png"
-      :fullscreen="false"
-      :is-open="isJlzzModalOpen"
-      :token="token"
-      @modal-closed="handleJlzzModalClosed"
-      @conversation-start="handleJlzzConversationStart"
-      @token-invalid="handleTokenInvalid"
-    ></PcmJlzzModal>
-  </main>
+        <!-- 简历制作模态框 -->
+        <PcmJlzzModal
+          v-if="token"
+          ref="jlzzModalRef"
+          id="pcm-jlzz-modal"
+          modal-title="简历制作"
+          icon="https://pub.pincaimao.com/static/common/i_pcm_logo.png"
+          :fullscreen="false"
+          :is-open="isJlzzModalOpen"
+          :token="token"
+          @modal-closed="handleJlzzModalClosed"
+          @conversation-start="handleJlzzConversationStart"
+          @token-invalid="handleTokenInvalid"
+        ></PcmJlzzModal>
+
+       
+
+        <!-- 使用 naive-ui Modal 嵌套 PcmZskChatModal 智能员工组件 -->
+        <n-modal
+          v-model:show="isNaiveModalOpen"
+          class="custom-card"
+          preset="card"
+          :style="{width: '600px'}"
+          size="huge"
+          :bordered="false"
+          :auto-focus="false"
+          :trap-focus="false"
+          :mask-closable="false"
+          :close-on-esc="false"
+        >
+          <PcmZskChatModal
+            v-if="token"
+            id="pcm-zsk-modal"
+            :is-open="isZskModalOpen"
+            :token="token"
+            fullscreen="false"
+            employee-id="137"
+            @modal-closed="handleZskModalClosed"
+            @conversation-start="handleZskConversationStart"
+            @stream-complete="handleStreamComplete"
+            @token-invalid="handleTokenInvalid"
+          ></PcmZskChatModal>
+        </n-modal>
+      </main>
+    </NMessageProvider>
+  </NConfigProvider>
 </template>
 
 <style scoped>
@@ -256,9 +349,10 @@ header {
 
 .token-status {
   margin-bottom: 20px;
-  padding: 10px;
-  border-radius: 4px;
+  padding: 15px;
+  border-radius: 8px;
   text-align: center;
+  font-weight: 500;
 }
 
 .token-success {
