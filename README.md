@@ -53,9 +53,9 @@ pnpm build
 ## 🔑 系统配置
 
 本演示使用的系统密钥：
-- **Secret ID (AK)**: `ak-BMSZyMnACKX6MPNne9zPfdFA`
-- **Secret Key (SK)**: `sk-qrFpGRrDiAcu0YSUirhOVgPBT83qusb5`
-- **User ID**: `76015687511834624`
+- **Secret ID (AK)**: `ak-BMSZyMnACKX6MPNne9zPfdFB`
+- **Secret Key (SK)**: `sk-qrFpGRrDiAcu0YSUirhOVgPBT83qusb6`
+- **User ID**: `76015687511834625`
 
 ### Token获取机制
 
