@@ -1,22 +1,24 @@
 {
-  "name": "my-app",
-  "version": "0.0.0",
+  "name": "ai-recruitment-demo",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "run-p type-check \"build-only {@}\" --",
+    "build": "vite build",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build"
   },
   "dependencies": {
+    "crypto-js": "^4.2.0",
     "pcm-agents": "0.6.5",
-    "pcm-agents-vue": "^0.2.6",
+    "pcm-agents-vue": "^0.3.22",
     "vue": "^3.2.37"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.0",
+    "@types/crypto-js": "^4.2.2",
     "@types/node": "^22.13.9",
     "@vitejs/plugin-vue": "^4.2.1",
     "@vitejs/plugin-vue-jsx": "^3.1.0",

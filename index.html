@@ -1,10 +1,31 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8">
     <link rel="icon" href="/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vite App</title>
+    <title>AI招聘助手演示平台 - 上海未软人工智能</title>
+    <meta name="description" content="基于聘才猫SDK的AI招聘功能演示平台，提供职业规划、模拟面试、简历匹配等智能招聘服务">
+    <meta name="keywords" content="AI招聘,人工智能,职业规划,模拟面试,简历匹配,聘才猫,上海未软">
+    <!-- 添加crypto polyfill支持 -->
+    <script>
+      // 确保crypto对象可用
+      if (typeof window.crypto === 'undefined') {
+        window.crypto = {};
+      }
+      if (typeof window.crypto.subtle === 'undefined') {
+        window.crypto.subtle = {};
+      }
+      // 添加基本的digest方法polyfill
+      if (typeof window.crypto.subtle.digest === 'undefined') {
+        window.crypto.subtle.digest = function() {
+          console.warn('crypto.subtle.digest not available, using fallback');
+          return Promise.resolve(new ArrayBuffer(0));
+        };
+      }
+    </script>
+    <!-- 引入聘才猫SDK -->
+    <script type="module" src="https://pub.pincaimao.com/sdk/js/pcm-agents@latest/dist/pcm-agents/pcm-agents.esm.js"></script>
   </head>
   <body>
     <div id="app"></div>

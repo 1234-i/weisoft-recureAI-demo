@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  pcm-agents-demo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pcm-agents-demo
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    volumes:
+      # 可选：挂载日志目录
+      - ./logs:/var/log/nginx
+    networks:
+      - pcm-network
+
+networks:
+  pcm-network:
+    driver: bridge
